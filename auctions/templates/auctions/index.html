@@ -1,0 +1,47 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}    
+    <h2>Active Listings</h2>
+    <form action="{% url 'display_category' %}" method="POST" class="my-3">
+        {% csrf_token %}
+        <div class="d-flex align-items-center">
+            <label for="category" class="mr-2">Choose a category:</label>
+            <select name="category" id="category" class="mr-2">
+                {% for category in categories %}
+                    {% if selected_category == category %}
+                        <option value="{{ category }}" selected>{{ category }}</option>
+                    {% else %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-warning btn-sm">Select Category</button> 
+        </div>     
+    </form>
+    
+    
+    <style>
+        .card-custom {
+          margin-right: 10px;
+          margin-bottom: 10px;
+        }
+    </style>
+        
+    <div class="row mx-3">
+    {% for listing in listings %}
+        <div class="card card-custom" style="width: 18rem;">
+            <img class="card-img-top" src="{{ listing.image }}" alt="{{ listing.title }}">
+            <div class="card-body">
+            <h5 class="card-title">{{ listing.title }}</h5>
+            <p class="card-text">{{ listing.description }}</p>
+            <p class="card-text">{{ listing.price }}</p>
+            <p class="card-text">Category: {{ listing.category }}</p>
+            <a href="{% url 'listing' id=listing.id %}" class="btn btn-primary">Go to Listing</a>
+            </div>
+        </div>     
+    {% endfor %}
+    </div>
+        
+{% endif %}    
+{% endblock %}

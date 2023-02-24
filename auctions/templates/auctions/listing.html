@@ -1,0 +1,98 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        {% if message %}
+            {% if update %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}  
+                </div>
+            {% else %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}  
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if listing.closed and user == listing.price.user %}
+        <div class="alert alert-success" role="alert">
+            Congrats! You are the winner of this auction!     
+        </div>
+    {% endif %}
+    <div class="row mx-3">
+      {% if request.user.is_authenticated %}
+        {% if isSeller %}
+          <form action="{% url 'close_auction' id=listing.id %}" method="POST" class="mx-3">
+              {% csrf_token %}
+              <button type="submit" name="button" class="btn btn-danger btn-sm" value="Close">Close</button>
+          </form> 
+        {% endif %}
+        <div>
+          <a href="{% url 'toggle_watchlist' id=listing.id %}">
+              {% if request.user in listing.watchlist.all %}
+                  <button type="submit" class="btn btn-danger btn-sm">Remove from Watchlist</button>
+              {% else %}
+                  <button type="submit" class="btn btn-success btn-sm">Add to Watchlist</button>
+              {% endif %}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+      
+    <h2 class="my-3">{{ listing.title }}</h2>
+    <img src="{{ listing.image }}" alt="{{ listing.title }}" height="400px">
+    <p class="my-3" style="font-family: 'Nunito', sans-serif;"> <strong>About this listing:</strong> {{ listing.description }}</p>
+    <h5 class="my-3" style="font-family: 'Nunito', sans-serif;"> ${{ listing.price.price }}</h5>
+    <ul>
+        <li><strong>Listed by:</strong> {{ listing.seller|title }}</li>
+        <li><strong>Category:</strong> {{ listing.category }}</li> 
+    </ul>
+    {% if user.is_authenticated %}
+    <form action="{% url 'place_bid' id=listing.id %}" method="POST" class="form-inline">
+        {% csrf_token %}
+        <div class="input-group">
+            <input type="number" min="0" name="new_bid" placeholder="Add a new bid!" class="form-control">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-warning btn-sm">Add</button>
+            </div>
+        </div>
+    </form>    
+    
+    {% endif %}
+
+    <div id="message" style="color:rgb(164, 135, 222); font-weight:bold;">{{ message }}</div>
+    <br/>
+
+    <div class="row justify-content-left">
+        <div class="col-sm-8 col-md-6">
+          <form action="{% url 'add_comment' id=listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="new_comment">Add a new comment:</label>
+              <input type="text" name="new_comment" id="new_comment" placeholder="Add a new comment!" class="form-control">
+              <button type="submit" class="btn btn-primary mt-3 btn-sm">Add Comment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div class="card mb-3">
+        <div class="card-header">
+          <h4>Comments</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for comment in all_comments %}
+          <li class="list-group-item">
+            <div class="card border-0">
+              <div class="card-body pl-0">
+                <h5 class="card-title" style="font-size: 16px; font-weight: bold">{{ comment.user.username|title }}</h5>
+                <p class="card-text" style="font-size: 14px">{{ comment.comment }}</p>
+                <p class="card-subtitle text-muted" style="font-size: 12px; text-align: left">{{ comment.time }}</p>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      
+{% endblock %}
